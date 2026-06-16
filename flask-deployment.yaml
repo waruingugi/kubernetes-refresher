@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: flask
+  name: flask
+spec:
+  replicas: 5  # Desired state: keep 3 pods alive
+  selector:
+    matchLabels:  # The pods I manage are the ones labeled app=flask
+      app: flask
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: flask
+    spec:
+      containers:
+      - image: flaskapp:1.0
+        name: flask
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 5000
