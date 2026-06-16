@@ -5,7 +5,7 @@ metadata:
     app: flask
   name: flask
 spec:
-  replicas: 5  # Desired state: keep 3 pods alive
+  replicas: 3  # Desired state: keep 3 pods alive
   selector:
     matchLabels:  # The pods I manage are the ones labeled app=flask
       app: flask
@@ -16,8 +16,13 @@ spec:
         app: flask
     spec:
       containers:
-      - image: flaskapp:1.0
+      - image: flaskapp:3.0
         name: flask
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 5000
+        env:
+          - name: REDIS_HOST
+            value: "redis"
+          - name: REDIS_PORT
+            value: "6379"
