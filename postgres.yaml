@@ -17,7 +17,10 @@ spec:
           image: postgres:16-alpine
           env:
             - name: POSTGRES_PASSWORD
-              value: "devpassword" # plaintext password in a manifest - see notes
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
           ports:
             - containerPort: 5432
 

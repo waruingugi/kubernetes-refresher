@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flask-config
+data:
+  GREETING: "Greetings, version two!"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  DB_HOST: "postgres"
+  DB_NAME: "postgres"
+  DB_USER: "postgres"

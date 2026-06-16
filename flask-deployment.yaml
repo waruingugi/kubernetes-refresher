@@ -16,13 +16,24 @@ spec:
         app: flask
     spec:
       containers:
-      - image: flaskapp:3.0
+      - image: flaskapp:4.0
         name: flask
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 5000
+        envFrom:
+          - configMapRef:
+              name: flask-config
         env:
-          - name: REDIS_HOST
-            value: "redis"
-          - name: REDIS_PORT
-            value: "6379"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: password
+        volumeMounts:
+          - name: config-files
+            mountPath: /etc/flask-config
+      volumes:
+        - name: config-files
+          configMap:
+            name: flask-config
