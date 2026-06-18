@@ -16,11 +16,38 @@ spec:
         app: flask
     spec:
       containers:
-      - image: flaskapp:4.0
-        name: flask
+      - image: flaskapp:5.0
+        name: flaskapp
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 5000
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          failureThreshold: 30
+          periodSeconds: 2 # up tp 60s (30 x 2s) to start before liveness engages
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "500m"
+            memory: "128Mi"
         envFrom:
           - configMapRef:
               name: flask-config

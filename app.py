@@ -5,31 +5,52 @@ import redis, psycopg2
 
 app = Flask(__name__)
 POD_NAME = socket.gethostname()
-APP_VERSION = "4.0"
+APP_VERSION = "5.0"
+
+health = {"live": True, "ready": True} # in-memory switches; reset on container restart
+_ballast = [] # for the memory limit demo
 
 r = redis.Redis(host=os.environ.get("REDIS_HOST", "redis"),
-                port=int(os.environ.get("REDIS_PORT", 6379)),
-                socket_connect_timeout=2
-                )
+                port=int(os.environ.get("REDIS_PORT", "6379")),
+                socket_connect_timeout=2)
 
 def db():
-    return psycopg2.connect(
-        host=os.environ.get("DB_HOST", "postgres"),
-        dbname=os.environ.get("DB_NAME", "postgres"),
-        user=os.environ.get("DB_USER", "postgres"),
-        password=os.environ.get("DB_PASSWORD", ""),
-        connect_timeout=2,
-    )
+    return psycopg2.connect(host=os.environ.get("DB_HOST", "postgres"),
+                            dbname=os.environ.get("DB_NAME", "postgres"),
+                            user=os.environ.get("DB_USER", "postgres"),
+                            password=os.environ.get("DB_PASSWORD", ""),
+                            connect_timeout=2)
 
 @app.route("/")
 def home():
-    greeting = os.getenv("GREETING", "Hello from Flask on Kubernetes!")
+    greeting = os.environ.get("GREETING", "Hello from Flask on Kubernetes")
     try:
         counter = f"Visit #{r.incr('visits')} (shared via Redis)"
     except redis.exceptions.RedisError:
         counter = "Visit counter unavailable"
     return f"{greeting} (v{APP_VERSION})\nServed by pod: {POD_NAME}\n{counter}\n"
 
+
+@app.route("/healthz")                    # liveness target
+def healthz():
+    return ("ok\n", 200) if health["live"] else ("unhealthy\n", 500)
+
+@app.route("/ready")                      # readiness target
+def ready():
+    return ("ready\n", 200) if health["ready"] else ("not ready\n", 503)
+
+
+@app.route("/toggle/<what>")              # flip 'live' or 'ready' on this pod
+def toggle(what):
+    if what in health:
+        health[what] = not health[what]
+        return f"{what} = {health[what]}\n"
+    return "unknown\n", 404
+
+@app.route("/eat/<int:mb>")               # allocate memory, for the OOM demo
+def eat(mb):
+    _ballast.append(bytearray(mb * 1024 * 1024))
+    return f"allocated {mb}MB\n"
 
 @app.route("/notes/add/<text>")
 def add_note(text):
@@ -41,8 +62,7 @@ def add_note(text):
         conn.close()
         return f"Saved note: {text}\n"
     except psycopg2.Error as e:
-        return f"Database error: {e}", 500
-
+        return f"Database error: {e}\n", 500
 
 @app.route("/notes")
 def list_notes():
@@ -57,9 +77,6 @@ def list_notes():
     except psycopg2.Error as e:
         return f"Database error: {e}\n", 500
 
-@app.route("/healthz")
-def healthz():
-    return "ok\n", 200
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
