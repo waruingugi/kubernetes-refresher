@@ -1,14 +1,14 @@
-apiVersion: v1
-kind: Pod
-metadata:
-  name: flask-with-probe
-spec:
-  containers:
-    - name: flask
-      image: flaskapp:1.0
-      imagePullPolicy: IfNotPresent
-      ports:
-        - containerPort: 5000
-    - name: probe
-      image: busybox
-      command: ["sh", "-c", "while true; do wget -qO- localhost:5000; sleep 5; done"]
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: flask-with-probe
+#spec:
+#  containers:
+#    - name: flask
+#      image: flaskapp:1.0
+#      imagePullPolicy: IfNotPresent
+#      ports:
+#        - containerPort: 5000
+#    - name: probe
+#      image: busybox
+#      command: ["sh", "-c", "while true; do wget -qO- localhost:5000; sleep 5; done"]

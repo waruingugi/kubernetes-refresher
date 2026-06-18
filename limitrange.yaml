@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: notes-limits
+spec:
+  limits:
+    - type: Container
+      default:   # used as the LIMIT if a container set none
+        cpu: 500m
+        memory: 128Mi
+      defaultRequest: # used as the REQUEST if a container set none
+        cpu: 100m
+        memory: 64Mi
