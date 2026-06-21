@@ -5,7 +5,6 @@ metadata:
     app: flask
   name: flask
 spec:
-  replicas: 3  # Desired state: keep 3 pods alive
   selector:
     matchLabels:  # The pods I manage are the ones labeled app=flask
       app: flask
@@ -16,7 +15,7 @@ spec:
         app: flask
     spec:
       containers:
-      - image: flaskapp:5.0
+      - image: flaskapp:6.0
         name: flaskapp
         imagePullPolicy: IfNotPresent
         ports:

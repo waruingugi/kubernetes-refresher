@@ -77,6 +77,15 @@ def list_notes():
     except psycopg2.Error as e:
         return f"Database error: {e}\n", 500
 
+
+@app.route("/compute")
+def compute():
+    x = 0
+    for _ in range(5_000_000):
+        x += 1
+    return f"done {x}\n"
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 

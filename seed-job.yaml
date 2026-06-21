@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed-notes
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: postgres:16-alpine
+          command: [ "sh", "-c",
+                   "psql -h postgres -U postgres -c \"CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, text TEXT); INSERT INTO notes (text) VALUES ('seeded by a Job')\"" ]
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
