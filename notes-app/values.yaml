@@ -1,0 +1,7 @@
+replicaCount: 3
+image:
+  repository: flaskapp
+  tag: "6.0"
+greeting: "Hello from a Helm chart!"
+service:
+  port: 8080
